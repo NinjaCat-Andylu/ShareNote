@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <link rel="stylesheet" href="scripts/semantic-ui-css/semantic.min.css">
+  <link href="https://fonts.googleapis.com/css?family=Satisfy" rel="stylesheet">
+  <link rel="stylesheet" href="style/index_style.css">
+  <!--C:\webrtc_project2-master\node_modules\cropperjs\dist-->
+  <title>SimpleWebRTC </title>
+
+  <style>
+    html { margin-top: 20px; }
+    #chat-content { height: 180px;  overflow-y: scroll; }
+    video {height:250px; width: 250px;}
+  </style>
+</head>
+<body>
+  <!-- Main Content -->
+  <div class="ui container">
+    <div class="ui two column stackable grid">
+
+    <!--dangle??-->
+    </div>
+  <!-- Chat Section -->
+  <div class="ui ten wide column">
+    <img src="http://140.136.150.93/media/logo.png"   >
+    </img>
+    <div class="ui inverted segment">
+      <!-- Chat Room Form -->
+      <div class="ui inverted form">
+        <div class="two fields">
+
+          <!--<div class="field">
+            <label>User Name</label>
+            <input type="text" placeholder="Enter user name" id="username" name="username">
+          </div>-->
+          <div class="field">
+            <label>Room</label>
+            <input type="text" placeholder="Enter room name" id="roomName" name="roomName">
+          </div>
+          <div class="field">
+            <label>theme</label>
+            <input type="text" placeholder="Enter room theme" id="theme" name="theme">
+          </div>
+        </div>
+        <br>
+        <div class="ui buttons">
+          <div id="create-btn" class="ui submit teal button">Create Room</div>
+          <div class="or"></div>
+          <div id="join-btn" class="ui submit violet button">Join Room</div>
+          <div class="or"></div>
+          <!--<a href="show_room.html" class="ui blue button" target="_blank">Show Room</a>-->
+          <div onclick="showroom()" class="ui blue button" >Show Room</div>
+        </div>
+      </div>
+      <!-- Chat Room Messages -->
+      <div id="chat"></div>
+      </div>
+      <!-- Local Camera -->
+    <!-- TEMPLATES -->
+      <!-- Remote Video Template -->
+      <iframe id="roomiframe" name="roomiframe" src="https://140.136.150.93:3232/show_room.html" width="1120" height="1000" scrolling="yes" align="center" ></iframe>
+  </div>
+  <!-- End of Chat Section -->
+      <!--canvas-->
+      <!--49.159.173.38
+	 http://[YOUR IP]:1235/socket.io/socket.io.js -->
+    </div>
+    <div class="ui six wide column">
+
+
+      <script id="remote-video-template" type="text/x-handlebars-template" align=center>
+        <div id="{{ id }}" >
+        </div>
+      </script>
+      <div id="remote-videos" class="ui stackable grid">
+        <video id="local-video"   autoplay></video>
+      </div>
+      <h4 class="ui center aligned header" style="margin:0;">
+        Local Camera
+      </h4>
+    </div>
+    <h3 class="ui center aligned header">Remote Cameras</h3>
+  </div>
+
+  <!-- Remote Cameras -->
+<!--http://140.136.150.93:3000/note/vbmOeY/lejvYe-->
+<!--canvas-->
+  <script src="script/domvas.js"></script>
+  <script src="script/iframe2image.js"></script>
+  <div id="sideBside">
+  <canvas id="myCanvas" width="800" height="500" style="border:2px solid #d3d3d3;" align="left">
+  </canvas>
+  <!--<iframe id="crop" name="crop" src="{{ip}}" width="700" height="500" scrolling="yes"  style="position:absolute;z-index: -1;left: 50px;top: 300px;" ></iframe>-->
+  <script id="ipget" type="text/x-handlebars-template">
+  <iframe id="crop" name="crop" src="{{ip}}" width="700" height="500" scrolling="yes" align="right" ></iframe>
+  </script>
+
+  </div>
+  <select id="theList" width="100px" onChange="printurl(this.value);" >
+  </select>
+  <form action="/somewhere/to/upload" enctype="multipart/form-data" id = "myfrom"><!--上傳圖片的表單-->
+  <input id="uploadImage" type="file" name="photo" accept="image/*"/>
+  </form>
+  <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.4.5/socket.io.min.js"></script>
+  <script type="text/javascript" src="script/paint.js"></script>
+
+   <!-- Chat Content Template -->
+<script id="chat-content-template" type="text/x-handlebars-template">
+  {{#each messages}}
+    <div class="event">
+      <div class="label">
+        <i class="icon blue user"></i>
+      </div>
+      <div class="content">
+        <div class="summary">
+          <font color = " #00BFFF">
+          <a href="#"> {{ username }}</a> posted on
+          <div class="date">
+            {{ postedOn }}
+          </font>
+          </div>
+        </div>
+        <div class="extra text">
+          <font color = "white">
+          {{ message }}
+        </font>
+        </div>
+      </div>
+    </div>
+  {{/each}}
+</script>
+
+  <!-- Chat Template -->
+<script id="chat-template" type="text/x-handlebars-template">
+  <h3 class="ui orange header">Room ID -> <strong>{{ room }}</strong></h3>
+  <hr>
+  <div id="chat-content" class="ui feed"> </div>
+  <hr>
+  <div class="ui form">
+    <div class="ui field">
+      <font color = "white">
+      <label>Post Message</label>
+    </font>
+      <textarea id="post-message" name="post-message" rows="1" color="yellow" ></textarea>
+    </div>
+    <div id="post-btn" class="ui primary submit button">Send</div>
+    <button class="ui violet button" onclick="LeaveButton()"> leave </button>
+    <div class="dropdown">
+  <button onclick="myFunction()" class="ui teal button">Dropdown</button>
+    <div id="myDropdown" class="dropdown-content" >
+      <input type="text" placeholder="Search.." id="myInput" onkeyup="filterFunction()" >
+      <div id="adddrop">
+      <!--<a value="volvo">About</a>-->
+      </div>
+    </div>
+    <button onclick="iframeshow()" class="ui teal button">iframe</button>
+  </div>
+    </div>
+</script>
+
+  <!-- Scripts -->
+  <script src="scripts/jquery/dist/jquery.min.js"></script>
+  <script src="scripts/semantic-ui-css/semantic.min.js"></script>
+  <script src="scripts/handlebars/dist/handlebars.min.js "></script>
+  <script src="scripts/simplewebrtc/out/simplewebrtc-with-adapter.bundle.js"></script>
+  <script src="js/app.js"></script>
+
+</body>
+</html>
